@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import random
+from model import TVAE
 random.seed(42)
 np.random.seed(42)
 os.chdir('D:\dy\prj')
