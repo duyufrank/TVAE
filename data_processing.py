@@ -73,7 +73,32 @@ for target in targets:
         user_data.append(df2[df2['advertiser_id'].isin(select),usecols=atts])        
         
 
+files = os.listdir()
+data = []
+i=0
+for file in tqdm(files):
+    data.append(pd.read_csv(file,index_col='advertiser_id').iloc[:,-45:])
 
+df = pd.concat(data)
+df['poi'] = df['poi'].apply(lambda x:winsorize(x,1))
+df['poi.1'] = df['poi.1'].apply(lambda x:winsorize(x,1))
+dur = df['end_hour']-df['start_hour']
+dur = dur.apply(lambda x: x+24 if x<0 else x)
+dur = normalize(dur)
+speed = normalize(df['speed'])
+weekend = df['start_weekend']
+start = df['start_hour']
+starts = pd.get_dummies(start).iloc[:,1:]
+df = pd.concat([df.iloc[:,:-5],speed,dur,weekend,starts],axis=1)
+df_np = df.groupby('advertiser_id').apply(lambda x:x.to_numpy())
+user_names = df_np.index
+user_data = np.array([i for i in df_np])
+
+
+with open('../user_name.txt','w') as f:
+    f.write('\n'.join(user_names))
+
+np.save('../user_data.npy',user_data)
 
 
 
